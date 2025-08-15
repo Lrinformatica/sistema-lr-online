@@ -1,0 +1,13 @@
+# Ambiente Virtual
+.venv/
+venv/
+
+# Arquivos de IDE
+.idea/
+
+# Banco de dados de teste
+db.sqlite3
+
+# Cache do Python
+__pycache__/
+*.pyc

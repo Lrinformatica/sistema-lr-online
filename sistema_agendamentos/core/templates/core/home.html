@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Bem-vindo ao LSystem{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos para deixar mais elegante */
+    .comercio-card {
+        transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+        border: none;
+        border-radius: 0.75rem; /* Bordas mais arredondadas */
+    }
+    .comercio-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .card-img-top {
+        height: 180px;
+        object-fit: cover; /* Garante que a imagem cubra a área sem distorcer */
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+    }
+    .bg-placeholder {
+        background: linear-gradient(45deg, #6d28d9, #4c1d95); /* Um gradiente roxo elegante */
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Bem-vindo!</h1>
+        <p class="lead text-muted">Encontre os melhores serviços e agende seu horário com nossos parceiros.</p>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="input-group input-group-lg shadow-sm">
+                    <input type="text" class="form-control" placeholder="Encontre um serviço ou estabelecimento...">
+                    <button class="btn btn-primary" style="background-color: #6d28d9; border-color: #6d28d9;" type="button">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-5">
+        <div class="btn-group shadow-sm" role="group">
+            <button type="button" class="btn btn-outline-secondary active">Todos</button>
+            <button type="button" class="btn btn-outline-secondary">Salões de Beleza</button>
+            <button type="button" class="btn btn-outline-secondary">Clínicas</button>
+            <button type="button" class="btn btn-outline-secondary">Serviços de TI</button>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for comercio in comercios %}
+        <div class="col">
+            <div class="card h-100 shadow-sm comercio-card">
+                {% if comercio.logo %}
+                    <img src="{{ comercio.logo.url }}" class="card-img-top" alt="Logo de {{ comercio.nome }}">
+                {% else %}
+                    <div class="card-img-top bg-placeholder d-flex align-items-center justify-content-center">
+                        <span class="text-white fs-4">{{ comercio.nome|slice:":2" }}</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ comercio.nome }}</h5>
+                    <p class="card-text text-muted">
+                        <span class="badge bg-secondary">Serviços de TI</span> <br>
+                        <small>📍 Canindé de São Francisco, SE</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    {% comment %} --- CORREÇÃO APLICADA AQUI --- {% endcomment %}
+                    <a href="{% url 'lista_servicos' slug_do_comercio=comercio.slug %}" class="btn btn-primary w-100" style="background-color: #6d28d9; border-color: #6d28d9;">
+                        Ver Serviços e Agendar
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">Nenhum comerciante parceiro encontrado no momento.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

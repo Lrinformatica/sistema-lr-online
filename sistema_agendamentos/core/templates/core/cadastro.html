@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Crie sua Conta</title>
+    <style>
+        /* (Estilos podem ser os mesmos da outra página) */
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #5a2d82; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crie sua Conta</h1>
+        <p>Preencha os campos abaixo para criar seu acesso.</p>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }} <button type="submit">Cadastrar</button>
+        </form>
+    </div>
+</body>
+</html>

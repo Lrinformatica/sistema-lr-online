@@ -1,0 +1,46 @@
+{% extends 'core/painel/base_painel.html' %}
+{% block title %}Fechamento de Caixa{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-5">
+                <div class="card-header text-center fs-4 fw-bold">
+                    <i class="bi bi-box-arrow-up me-2"></i> Fechamento de Caixa
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Confira os valores e confirme para fechar o caixa.</p>
+                    <ul class="list-group list-group-flush fs-5">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Valor de Abertura:</span>
+                            <strong>R$ {{ caixa.valor_abertura|floatformat:2 }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total de Vendas (em Dinheiro):</span>
+                            <span class="text-success">+ R$ {{ total_vendas_dinheiro|floatformat:2 }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total de Suplementos:</span>
+                            <span class="text-success">+ R$ {{ total_suplementos|floatformat:2 }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total de Sangrias:</span>
+                            <span class="text-danger">- R$ {{ total_sangrias|floatformat:2 }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between bg-light">
+                            <strong class="fs-4">Valor Esperado em Caixa:</strong>
+                            <strong class="fs-4">R$ {{ valor_esperado|floatformat:2 }}</strong>
+                        </li>
+                    </ul>
+                    <hr>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg">Confirmar Fechamento de Caixa</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'core/painel/base_painel.html' %}
+{% block title %}{{ tipo }} de Caixa{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header text-center fs-4 fw-bold">
+                    {% if tipo == "Sangria" %}
+                        <i class="bi bi-box-arrow-up-right me-2"></i> Registrar Sangria (Retirada)
+                    {% else %}
+                        <i class="bi bi-box-arrow-in-down-right me-2"></i> Registrar Suplemento (Adição)
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Confirmar {{ tipo }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

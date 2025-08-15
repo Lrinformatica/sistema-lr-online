@@ -1,0 +1,36 @@
+{% extends 'core/painel/base_painel.html' %}
+{% block title %}Registrar Entrada de Estoque{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Registrar Entrada de Estoque</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Nova Entrada</h5>
+            <p class="card-text text-muted">Selecione o produto, a quantidade recebida e o preço de custo por unidade.</p>
+            <hr>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{% url 'gerenciar_produtos' %}" class="btn btn-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <i class="bi bi-info-circle me-2"></i> Como funciona?
+        </div>
+        <div class="card-body">
+            <p>Ao registrar uma nova entrada, a quantidade informada será **somada** ao estoque atual do produto selecionado.</p>
+            <p>O **Preço de Custo** do produto principal também será atualizado para este novo valor informado.</p>
+            <p>Esta ação ficará registrada no histórico do sistema para futuras consultas.</p>
+        </div>
+    </div>
+{% endblock %}

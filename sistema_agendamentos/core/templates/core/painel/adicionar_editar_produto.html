@@ -1,0 +1,23 @@
+{% extends 'core/painel/base_painel.html' %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{{ titulo_pagina }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'gerenciar_produtos' %}" class="btn btn-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

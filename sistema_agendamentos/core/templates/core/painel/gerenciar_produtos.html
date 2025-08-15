@@ -1,0 +1,55 @@
+{% extends 'core/painel/base_painel.html' %}
+{% block title %}Meus Produtos - {{ comercio.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Meus Produtos</h1>
+        <div>
+            <a href="{% url 'entrada_estoque' %}" class="btn btn-info text-white">
+                <i class="bi bi-box-arrow-in-down me-2"></i> Registrar Entrada
+            </a>
+            <a href="{% url 'adicionar_produto' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i> Adicionar Novo Produto
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header fs-5 fw-bold">
+            <i class="bi bi-box-seam me-2"></i> Estoque Atual
+        </div>
+        <div class="card-body">
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Nome do Produto</th>
+                        <th scope="col">Preço de Custo</th>
+                        <th scope="col">Preço de Venda</th>
+                        <th scope="col">Estoque</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for produto in produtos %}
+                    <tr>
+                        <td>{{ produto.nome }}</td>
+                        <td>R$ {{ produto.preco_custo|floatformat:2 }}</td>
+                        <td>R$ {{ produto.preco_venda|floatformat:2 }}</td>
+                        <td>{{ produto.quantidade_estoque }} Un.</td>
+                        <td>
+                            <a href="{% url 'editar_produto' produto.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="{% url 'excluir_item' tipo_item='produto' item_id=produto.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center p-3">Você ainda não cadastrou nenhum produto.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+{% endblock %}

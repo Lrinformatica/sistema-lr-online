@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meus Agendamentos</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f-9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #5a2d82; }
+        .agendamento-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa; }
+        .agendamento-item h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        a.botao { display: inline-block; background-color: #5a2d82; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; margin-top: 25px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Meus Agendamentos</h1>
+        <p>Olá, <strong>{{ user.username }}</strong>! Aqui está o seu histórico de agendamentos.</p>
+        <hr>
+
+        {% for agendamento in agendamentos %}
+            <div class="agendamento-item">
+                <h3>{{ agendamento.servico.nome }}</h3>
+                <p><strong>Comércio:</strong> {{ agendamento.comercio.nome_fantasia }}</p>
+                <p><strong>Profissional:</strong> {{ agendamento.funcionario.nome }}</p>
+                <p><strong>Data:</strong> {{ agendamento.data_hora|date:"d/m/Y" }}</p>
+                <p><strong>Horário:</strong> {{ agendamento.data_hora|time:"H:i" }}</p>
+            </div>
+        {% empty %}
+            <p>Você ainda não possui nenhum agendamento.</p>
+        {% endfor %}
+
+        <a href="{% url 'home' %}" class="botao">Fazer um Novo Agendamento</a>
+    </div>
+</body>
+</html>

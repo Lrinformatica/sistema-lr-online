@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nossos Serviços</title>
+</head>
+<body>
+    <h1>Conheça Nossos Serviços</h1>
+    <hr>
+    {% for servico in servicos %}
+        <div>
+            <h2>{{ servico.nome }}</h2>
+            <p>{{ servico.descricao }}</p>
+            <p><strong>Valor:</strong> R$ {{ servico.valor }}</p>
+            <p><strong>Duração:</strong> {{ servico.duracao_minutos }} minutos</p>
+            <a href="{% url 'pagina_agendamento' servico.id %}" style="text-decoration: none; background-color: #5a2d82; color: white; padding: 10px 15px; border-radius: 5px;">Agendar Agora</a>
+        </div>
+        <hr>
+    {% empty %}
+        <p>Nenhum serviço cadastrado no momento. (Cadastre um no painel de admin!)</p>
+    {% endfor %}
+</body>
+<div style="text-align: right; padding: 10px; background-color: #eee; margin-bottom: 20px;">
+    {% if user.is_authenticated %}
+        <span>Olá, <strong>{{ user.username }}</strong>!</span> |
+        <a href="{% url 'meus_agendamentos' %}">Meus Agendamentos</a> |
+        <a href="{% url 'logout' %}">Sair</a>
+    {% else %}
+        <a href="{% url 'login' %}">Entrar</a> |
+        <a href="{% url 'cadastro' %}">Cadastre-se</a>
+    {% endif %}
+</div>
+</html>

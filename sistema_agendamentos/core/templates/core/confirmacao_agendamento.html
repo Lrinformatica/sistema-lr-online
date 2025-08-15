@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendamento Confirmado!</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #4CAF50; }
+        .cupom { border: 2px dashed #ccc; padding: 20px; margin-top: 20px; text-align: left; background-color: #fafafa; }
+        .cupom p { font-size: 1.1em; line-height: 1.6; }
+        .cupom strong { color: #333; }
+        a.botao { display: inline-block; background-color: #5a2d82; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; margin-top: 25px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agendamento Confirmado com Sucesso! ✅</h1>
+        <p>Olá, <strong>{{ agendamento.cliente.username }}</strong>! Seu horário está garantido. Guarde os detalhes abaixo.</p>
+
+        <div class="cupom">
+            <p><strong>Serviço:</strong> {{ agendamento.servico.nome }}</p>
+            <p><strong>Profissional:</strong> {{ agendamento.funcionario.nome }}</p>
+            <p><strong>Data:</strong> {{ agendamento.data_hora|date:"d/m/Y" }}</p>
+            <p><strong>Horário:</strong> {{ agendamento.data_hora|time:"H:i" }}</p>
+            <hr>
+            <p><strong>Valor a Pagar:</strong> R$ {{ agendamento.servico.valor }}</p>
+        </div>
+
+        <a href="{% url 'lista_servicos' slug_do_comercio=agendamento.comercio.slug %}" class="botao">Fazer um Novo Agendamento</a>
+    </div>
+</body>
+</html>

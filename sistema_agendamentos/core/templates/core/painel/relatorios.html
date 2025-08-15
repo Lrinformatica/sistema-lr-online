@@ -1,0 +1,122 @@
+{% extends 'core/painel/base_painel.html' %}
+{% load static %}
+
+{% block title %}Relatórios Financeiros{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Relatórios Financeiros</h1>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">Faturamento Bruto</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4 border-end">
+                        <h6 class="text-muted">Hoje</h6>
+                        <h3>R$ {{ faturamento_hoje|floatformat:2 }}</h3>
+                    </div>
+                    <div class="col-4 border-end">
+                        <h6 class="text-muted">Esta Semana</h6>
+                        <h3>R$ {{ faturamento_semana|floatformat:2 }}</h3>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-muted">Este Mês</h6>
+                        <h3>R$ {{ faturamento_mes|floatformat:2 }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm text-white bg-success">
+            <div class="card-header">Lucro Bruto (Vendas - Custo dos Produtos)</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4 border-end">
+                        <h6 class="text-white-50">Hoje</h6>
+                        <h3>R$ {{ lucro_hoje|floatformat:2 }}</h3>
+                    </div>
+                    <div class="col-4 border-end">
+                        <h6 class="text-white-50">Esta Semana</h6>
+                        <h3>R$ {{ lucro_semana|floatformat:2 }}</h3>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-white-50">Este Mês</h6>
+                        <h3>R$ {{ lucro_mes|floatformat:2 }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm text-white bg-danger">
+            <div class="card-header">Total de Sangrias (Saídas)</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4 border-end"><h6 class="text-white-50">Hoje</h6><h3>R$ {{ total_sangrias_hoje|floatformat:2 }}</h3></div>
+                    <div class="col-4 border-end"><h6 class="text-white-50">Semana</h6><h3>R$ {{ total_sangrias_semana|floatformat:2 }}</h3></div>
+                    <div class="col-4"><h6 class="text-white-50">Mês</h6><h3>R$ {{ total_sangrias_mes|floatformat:2 }}</h3></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm text-white bg-info">
+            <div class="card-header">Total de Suplementos (Entradas)</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4 border-end"><h6 class="text-white-50">Hoje</h6><h3>R$ {{ total_suplementos_hoje|floatformat:2 }}</h3></div>
+                    <div class="col-4 border-end"><h6 class="text-white-50">Semana</h6><h3>R$ {{ total_suplementos_semana|floatformat:2 }}</h3></div>
+                    <div class="col-4"><h6 class="text-white-50">Mês</h6><h3>R$ {{ total_suplementos_mes|floatformat:2 }}</h3></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Detalhamento das Movimentações de Hoje ({{ hoje|date:"d/m/Y" }})</h5>
+    </div>
+    <div class="card-body">
+        <h6>Movimentações de Caixa (Sangrias e Suplementos)</h6>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimentacoes_hoje %}
+                <tr>
+                    <td>{{ mov.data|date:"H:i" }}</td>
+                    <td>
+                        {% if mov.tipo == 'sangria' %}
+                            <span class="badge bg-danger">Sangria (Saída)</span>
+                        {% else %}
+                            <span class="badge bg-info">Suplemento (Entrada)</span>
+                        {% endif %}
+                    </td>
+                    <td>R$ {{ mov.valor|floatformat:2 }}</td>
+                    <td>{{ mov.descricao }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Nenhuma sangria ou suplemento registrado hoje.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr class="my-4">
+        <h6>Vendas Realizadas</h6>
+        <p>Em breve: Uma tabela com todas as vendas, com filtros por data, aparecerá aqui.</p>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendar {{ servico.nome }}</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2 { color: #5a2d82; }
+        .detalhes { border-left: 4px solid #5a2d82; padding-left: 15px; background-color: #f9f9f9; }
+        .horario-btn { background-color: #e8eaf6; border: 1px solid #c5cae9; padding: 10px; margin: 5px; border-radius: 4px; color: #3f51b5; font-size: 1em; cursor: pointer; }
+        .horario-btn:hover { background-color: #c5cae9; }
+        select, input[type="date"] { padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #5a2d82; color: white; padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agendamento para: {{ servico.nome }}</h1>
+        <div class="detalhes">
+            <p><strong>Valor:</strong> R$ {{ servico.valor }}</p>
+            <p><strong>Duração aproximada:</strong> {{ servico.duracao_minutos }} minutos</p>
+        </div>
+        <hr>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <h2>1. Escolha o profissional:</h2>
+            <select name="funcionario" required>
+                <option value="" disabled selected>Selecione um profissional</option>
+                {% for funcionario in funcionarios_aptos %}
+                    <option value="{{ funcionario.id }}" {% if funcionario.id == funcionario_selecionado_id %}selected{% endif %}>
+                        {{ funcionario.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <h2 style="margin-top: 20px;">2. Escolha a data:</h2>
+            <input type="date" name="data_selecionada" required value="{{ data_selecionada_str }}">
+
+            <button type="submit" name="acao" value="ver_horarios" style="margin-top: 10px;">Ver Horários Disponíveis</button>
+
+            {% if horarios_disponiveis %}
+                <hr>
+                <h2>3. Escolha o horário:</h2>
+                <div>
+                    {% for horario in horarios_disponiveis %}
+                        <button type="submit" name="acao" value="agendar:{{ horario }}" class="horario-btn">
+                            {{ horario }}
+                        </button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+
+        <br><br>
+        <a href="{% url 'lista_servicos' slug_do_comercio=servico.comercio.slug %}
+
+" style="text-decoration: none;">&larr; Voltar para a lista de serviços</a>
+    </div>
+</body>
+</html>

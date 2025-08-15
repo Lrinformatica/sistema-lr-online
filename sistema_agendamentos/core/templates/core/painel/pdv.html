@@ -1,0 +1,374 @@
+{% extends 'core/painel/base_painel.html' %}
+{% block title %}PDV - Ponto de Venda{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">PDV - Ponto de Venda</h1>
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Buscar Produto ou Serviço (F5)</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Digite o nome ou código de barras..." id="termo-busca">
+                        <button class="btn btn-outline-secondary" type="button" id="botao-buscar">Buscar</button>
+                    </div>
+                    <div id="resultados-busca"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Itens da Venda</h5>
+                </div>
+                <div id="itens-venda-lista">
+                    <p class="text-muted p-3" id="carrinho-vazio-msg">O carrinho está vazio.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Informar Cliente (Opcional)</h5>
+                    <div class="mb-3">
+                        <label for="cliente-info-texto" class="form-label">CPF ou Nome no Cupom</label>
+                        <input type="text" class="form-control" id="cliente-info-texto" placeholder="Digite para identificação">
+                    </div>
+                    <hr>
+                    <h5 class="card-title">Resumo</h5>
+                    <div id="resumo-venda">
+                        <div class="d-flex justify-content-between">
+                            <span>Subtotal</span>
+                            <span id="subtotal-venda">R$ 0,00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Desconto Total</span>
+                            <span id="desconto-venda-display" class="text-danger">- R$ 0,00</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title">Total da Venda</h5>
+                        <h2 class="display-6 fw-bold" id="total-venda">R$ 0,00</h2>
+                    </div>
+                    <hr>
+                    <h5 class="card-title">Pagamento</h5>
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="desconto-total-input">Desconto (R$ ou %)</label>
+                        <input type="text" class="form-control" id="desconto-total-input" placeholder="Ex: 10 ou 5%">
+                        <button class="btn btn-outline-secondary" type="button" id="aplicar-desconto-total">Aplicar</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="forma-pagamento" class="form-label">Forma de Pagamento</label>
+                        <select class="form-select" id="forma-pagamento">
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="pix">PIX</option>
+                            <option value="debito">Cartão de Débito</option>
+                            <option value="credito">Cartão de Crédito</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="campo-valor-pago-div" style="display: block;">
+                        <label for="valor-pago" class="form-label">Valor Pago pelo Cliente</label>
+                        <input type="number" class="form-control" id="valor-pago" placeholder="Ex: 150.00" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="troco" class="form-label">Troco</label>
+                        <input type="text" class="form-control" id="troco" readonly value="R$ 0,00">
+                    </div>
+                    <div class="d-grid">
+                        <button class="btn btn-success btn-lg" id="botao-finalizar-venda" disabled>Finalizar Venda (F4)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    const termoBuscaInput = document.getElementById('termo-busca');
+    const botaoBuscar = document.getElementById('botao-buscar');
+    const resultadosBuscaDiv = document.getElementById('resultados-busca');
+    const itensVendaListaDiv = document.getElementById('itens-venda-lista');
+    const subtotalVendaEl = document.getElementById('subtotal-venda');
+    const descontoVendaDisplayEl = document.getElementById('desconto-venda-display');
+    const totalVendaEl = document.getElementById('total-venda');
+    const carrinhoVazioMsg = document.getElementById('carrinho-vazio-msg');
+    const formaPagamentoSelect = document.getElementById('forma-pagamento');
+    const campoValorPagoDiv = document.getElementById('campo-valor-pago-div');
+    const valorPagoInput = document.getElementById('valor-pago');
+    const trocoInput = document.getElementById('troco');
+    const botaoFinalizarVenda = document.getElementById('botao-finalizar-venda');
+    const descontoTotalInput = document.getElementById('desconto-total-input');
+    const aplicarDescontoTotalBtn = document.getElementById('aplicar-desconto-total');
+
+    let carrinho = [];
+    let descontoTotalVenda = 0;
+
+    botaoBuscar.addEventListener('click', buscarItens);
+    termoBuscaInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); buscarItens(); } });
+    formaPagamentoSelect.addEventListener('change', () => atualizarCarrinho());
+    valorPagoInput.addEventListener('input', () => atualizarCarrinho());
+    botaoFinalizarVenda.addEventListener('click', finalizarVenda);
+    aplicarDescontoTotalBtn.addEventListener('click', aplicarDescontoTotal);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F5') {
+            e.preventDefault();
+            termoBuscaInput.focus();
+            termoBuscaInput.select();
+        }
+        if (e.key === 'F4') {
+            e.preventDefault();
+            if (!botaoFinalizarVenda.disabled) {
+                finalizarVenda();
+            }
+        }
+    });
+
+    async function buscarItens() {
+        const termo = termoBuscaInput.value;
+        if (termo.length < 2) return;
+        const response = await fetch(`/painel/pdv/buscar-itens/?termo=${termo}`);
+        const data = await response.json();
+        exibirResultados(data.itens);
+    }
+
+    function exibirResultados(itens) {
+        resultadosBuscaDiv.innerHTML = '';
+        if (itens.length === 0) {
+            resultadosBuscaDiv.innerHTML = '<p class="text-muted mt-2">Nenhum item encontrado.</p>';
+            return;
+        }
+        const lista = document.createElement('ul');
+        lista.className = 'list-group mt-2';
+        itens.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `<span>${item.nome} (${item.tipo}) - R$ ${parseFloat(item.preco).toFixed(2)}</span>`;
+            const botaoAdicionar = document.createElement('button');
+            botaoAdicionar.className = 'btn btn-sm btn-primary';
+            botaoAdicionar.innerText = 'Adicionar';
+            botaoAdicionar.onclick = () => perguntarQuantidade(item);
+            li.appendChild(botaoAdicionar);
+            lista.appendChild(li);
+        });
+        resultadosBuscaDiv.appendChild(lista);
+    }
+
+    function perguntarQuantidade(item) {
+        const quantidadeStr = prompt(`Qual a quantidade para "${item.nome}"?`, "1");
+        if (!quantidadeStr) return;
+        const quantidade = parseFloat(quantidadeStr.replace(',', '.'));
+        if (isNaN(quantidade) || quantidade <= 0) {
+            alert("Por favor, insira uma quantidade válida.");
+            return;
+        }
+        adicionarItemVenda(item, quantidade);
+    }
+
+    function adicionarItemVenda(item, quantidade) {
+        carrinho.push({ ...item, quantidade: quantidade, desconto: 0 });
+        resultadosBuscaDiv.innerHTML = '';
+        termoBuscaInput.value = '';
+        termoBuscaInput.focus();
+        atualizarCarrinho();
+    }
+
+    function removerItemCarrinho(indexDoItem) {
+        carrinho.splice(indexDoItem, 1);
+        atualizarCarrinho();
+    }
+
+    function aplicarDescontoItem(indexDoItem) {
+        const item = carrinho[indexDoItem];
+        const subtotalOriginal = item.quantidade * parseFloat(item.preco);
+        const descontoStr = prompt(`Aplicar desconto em "${item.nome}".\nSubtotal: R$ ${subtotalOriginal.toFixed(2)}\nDigite o valor do desconto (Ex: 10 ou 5%):`);
+
+        if (!descontoStr) return;
+
+        let descontoCalculado = 0;
+        if (descontoStr.includes('%')) {
+            const percentual = parseFloat(descontoStr.replace('%', '').replace(',', '.')) || 0;
+            descontoCalculado = (subtotalOriginal * percentual) / 100;
+        } else {
+            descontoCalculado = parseFloat(descontoStr.replace(',', '.')) || 0;
+        }
+
+        if (descontoCalculado > subtotalOriginal) {
+            alert("O desconto não pode ser maior que o subtotal do item.");
+            return;
+        }
+
+        item.desconto = descontoCalculado;
+        atualizarCarrinho();
+    }
+
+    function aplicarDescontoTotal() {
+        const subtotalGeral = carrinho.reduce((acc, item) => acc + (item.quantidade * parseFloat(item.preco)) - item.desconto, 0);
+        const descontoStr = descontoTotalInput.value;
+        if (!descontoStr) {
+            descontoTotalVenda = 0;
+            atualizarCarrinho();
+            return;
+        };
+
+        let descontoCalculado = 0;
+        if (descontoStr.includes('%')) {
+            const percentual = parseFloat(descontoStr.replace('%', '').replace(',', '.')) || 0;
+            descontoCalculado = (subtotalGeral * percentual) / 100;
+        } else {
+            descontoCalculado = parseFloat(descontoStr.replace(',', '.')) || 0;
+        }
+
+        if (descontoCalculado > subtotalGeral) {
+            alert("O desconto não pode ser maior que o subtotal da venda.");
+            return;
+        }
+
+        descontoTotalVenda = descontoCalculado;
+        atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+        let subtotalGeral = 0;
+        let descontoItensTotal = 0;
+
+        if (carrinho.length === 0) {
+            itensVendaListaDiv.innerHTML = '';
+            itensVendaListaDiv.appendChild(carrinhoVazioMsg);
+            botaoFinalizarVenda.disabled = true;
+        } else {
+            itensVendaListaDiv.innerHTML = '';
+            botaoFinalizarVenda.disabled = false;
+            const lista = document.createElement('ul');
+            lista.className = 'list-group list-group-flush';
+            carrinho.forEach((item, index) => {
+                const subtotalItem = item.quantidade * parseFloat(item.preco);
+                const subtotalComDesconto = subtotalItem - item.desconto;
+                subtotalGeral += subtotalItem;
+                descontoItensTotal += item.desconto;
+
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+
+                let textoHtml = `
+                    <div>
+                        ${item.quantidade}x ${item.nome}
+                        <small class="d-block text-muted">R$ ${subtotalComDesconto.toFixed(2)}</small>
+                    </div>
+                `;
+                if(item.desconto > 0) {
+                    textoHtml = `
+                        <div>
+                            ${item.quantidade}x ${item.nome}
+                            <small class="d-block"><s class="text-muted">R$ ${subtotalItem.toFixed(2)}</s> <span class="text-danger">(-R$ ${item.desconto.toFixed(2)})</span></small>
+                            <strong class="d-block">R$ ${subtotalComDesconto.toFixed(2)}</strong>
+                        </div>
+                    `;
+                }
+
+                const container = document.createElement('div');
+                container.className = 'd-flex justify-content-between align-items-center';
+                container.innerHTML = textoHtml;
+
+                const botoesDiv = document.createElement('div');
+                const botaoDesconto = document.createElement('button');
+                botaoDesconto.className = 'btn btn-sm btn-outline-warning me-1';
+                botaoDesconto.innerText = 'Desconto';
+                botaoDesconto.onclick = () => aplicarDescontoItem(index);
+
+                const botaoRemover = document.createElement('button');
+                botaoRemover.className = 'btn btn-sm btn-outline-danger';
+                botaoRemover.innerText = 'Remover';
+                botaoRemover.onclick = () => removerItemCarrinho(index);
+
+                botoesDiv.appendChild(botaoDesconto);
+                botoesDiv.appendChild(botaoRemover);
+                container.appendChild(botoesDiv);
+                li.appendChild(container);
+                lista.appendChild(li);
+            });
+            itensVendaListaDiv.appendChild(lista);
+        }
+
+        const descontoFinal = descontoItensTotal + descontoTotalVenda;
+        const totalFinal = subtotalGeral - descontoFinal;
+
+        subtotalVendaEl.innerText = `R$ ${subtotalGeral.toFixed(2)}`;
+        descontoVendaDisplayEl.innerText = `- R$ ${descontoFinal.toFixed(2)}`;
+        totalVendaEl.innerText = `R$ ${totalFinal.toFixed(2)}`;
+
+        atualizarInterfacePagamento(totalFinal);
+    }
+
+    function atualizarInterfacePagamento(total) {
+        if (formaPagamentoSelect.value === 'dinheiro') {
+            campoValorPagoDiv.style.display = 'block';
+            calcularTroco(total);
+        } else {
+            campoValorPagoDiv.style.display = 'none';
+            trocoInput.value = 'R$ 0,00';
+        }
+    }
+
+    function calcularTroco(total) {
+        const valorPago = parseFloat(valorPagoInput.value) || 0;
+        const totalFinal = total;
+        if (valorPago >= totalFinal) {
+            const troco = valorPago - totalFinal;
+            trocoInput.value = `R$ ${troco.toFixed(2).replace('.', ',')}`;
+        } else {
+            trocoInput.value = '---';
+        }
+    }
+
+    async function finalizarVenda() {
+        if (carrinho.length === 0) {
+            alert('O carrinho está vazio! Adicione itens antes de finalizar a venda.');
+            return;
+        }
+
+        const subtotalGeral = carrinho.reduce((acc, item) => acc + (item.quantidade * parseFloat(item.preco)), 0);
+        const descontoFinal = carrinho.reduce((acc, item) => acc + item.desconto, 0) + descontoTotalVenda;
+        const totalFinal = subtotalGeral - descontoFinal;
+
+        const clienteInfoTexto = document.getElementById('cliente-info-texto').value;
+
+        const dadosVenda = {
+            carrinho: carrinho,
+            forma_pagamento: formaPagamentoSelect.value,
+            total: totalFinal,
+            desconto: descontoFinal,
+            cliente_info_texto: clienteInfoTexto,
+        };
+
+        const response = await fetch('/painel/pdv/finalizar/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(dadosVenda)
+        });
+        const resultado = await response.json();
+        if (resultado.success) {
+            window.location.href = `/painel/venda/${resultado.venda_id}/recibo/`;
+        } else {
+            alert(`Ocorreu um erro ao finalizar a venda: ${resultado.error}`);
+        }
+    }
+});
+</script>
+{% endblock %}
