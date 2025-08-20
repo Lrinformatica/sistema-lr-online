@@ -164,3 +164,10 @@ class ClienteProfile(models.Model):
 
     def __str__(self):
             return f"Perfil de {self.user.username} para {self.comercio_associado.nome}"
+
+class ClienteProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile')
+    comercio_associado = models.ForeignKey(Comercio, on_delete=models.CASCADE)
+
+    def __str__(self):
+            return f"Perfil de {self.user.username} para {self.comercio_associado.nome}"
