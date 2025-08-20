@@ -11,20 +11,20 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
 from .models import (
     Comercio, Servico, HorarioTrabalho, Agendamento,
     Funcionario, Produto, Venda, ItemVendido, EntradaEstoque,
-    Caixa, MovimentacaoCaixa
+    Caixa, MovimentacaoCaixa, ClienteProfile
 )
 from .forms import (
     ProdutoForm, ServicoForm, FuncionarioForm, EntradaEstoqueForm,
     MovimentacaoCaixaForm, ClienteForm, ComercioConfigForm
 )
-# --- NOVO IMPORT DO DECORATOR ---
 from .decorators import comercio_ativo_required
 
 
-# ### VIEWS PÚBLICAS (NÃO PRECISAM DE VERIFICAÇÃO DE COMERCIO) ###
+# ### VIEWS PÚBLICAS ###
 
 def home(request):
     todos_os_comercios = Comercio.objects.all()
@@ -32,7 +32,6 @@ def home(request):
     return render(request, 'core/home.html', contexto)
 
 def listar_servicos(request, slug_do_comercio):
-    # ... (código existente sem alteração)
     try:
         comercio = Comercio.objects.get(slug=slug_do_comercio)
         servicos_cadastrados = Servico.objects.filter(comercio=comercio)
@@ -42,7 +41,6 @@ def listar_servicos(request, slug_do_comercio):
         return HttpResponseNotFound('<h1>Comércio não encontrado</h1>')
 
 def cadastro(request):
-    # ... (código existente sem alteração)
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -60,21 +58,18 @@ def logout_view(request):
 
 @login_required
 def meus_agendamentos(request):
-    # ... (código existente sem alteração)
     agendamentos = Agendamento.objects.filter(cliente=request.user).order_by('-data_hora')
     contexto = {'agendamentos': agendamentos}
     return render(request, 'core/meus_agendamentos.html', contexto)
 
 @login_required
 def confirmacao_agendamento(request, agendamento_id):
-    # ... (código existente sem alteração)
     agendamento = Agendamento.objects.get(id=agendamento_id)
     contexto = {'agendamento': agendamento}
     return render(request, 'core/confirmacao_agendamento.html', contexto)
 
 @login_required
 def pagina_agendamento(request, servico_id):
-    # ... (código existente sem alteração)
     servico = get_object_or_404(Servico, id=servico_id)
     funcionarios_aptos = Funcionario.objects.filter(servicos_que_realiza=servico)
     contexto = {'servico': servico, 'funcionarios_aptos': funcionarios_aptos, }
@@ -109,7 +104,7 @@ def pagina_agendamento(request, servico_id):
                     horario_trabalho = HorarioTrabalho.objects.get(dia_da_semana=dia_da_semana,
                                                                    comercio=servico.comercio)
                     agendamentos_do_dia = Agendamento.objects.filter(data_hora__date=data_selecionada,
-                                                                     funcionario=funcionario_selecionado)
+                                                                       funcionario=funcionario_selecionado)
                     horarios_ocupados = [ag.data_hora.time() for ag in agendamentos_do_dia]
                     hora_inicio = datetime.combine(data_selecionada, horario_trabalho.hora_inicio)
                     hora_fim = datetime.combine(data_selecionada, horario_trabalho.hora_fim)
@@ -125,18 +120,15 @@ def pagina_agendamento(request, servico_id):
     return render(request, 'core/pagina_agendamento.html', contexto)
 
 
-# ### VIEWS DO PAINEL (COM VERIFICAÇÃO DE ACESSO) ###
+# ### VIEWS DO PAINEL ###
 
 @login_required
 @comercio_ativo_required
-def painel_home(request, comercio): # O 'comercio' agora vem do decorator
-    # --- INÍCIO DA CORREÇÃO ---
+def painel_home(request, comercio):
     tz_local = timezone.get_current_timezone()
     hoje_local = timezone.now().astimezone(tz_local).date()
     inicio_dia_local = timezone.make_aware(datetime.combine(hoje_local, datetime.min.time()))
     fim_dia_local = timezone.make_aware(datetime.combine(hoje_local, datetime.max.time()))
-    # --- FIM DA CORREÇÃO ---
-
     agendamentos_de_hoje = Agendamento.objects.filter(comercio=comercio, data_hora__range=(inicio_dia_local, fim_dia_local)).order_by('data_hora')
     contexto = {'comercio': comercio, 'agendamentos': agendamentos_de_hoje}
     return render(request, 'core/painel/painel_home.html', contexto)
@@ -245,29 +237,22 @@ def adicionar_editar_funcionario(request, comercio, funcionario_id=None):
 @login_required
 @comercio_ativo_required
 def relatorios_financeiros(request, comercio):
-    # --- INÍCIO DA CORREÇÃO ---
     tz_local = timezone.get_current_timezone()
     hoje_local = timezone.now().astimezone(tz_local).date()
-
     inicio_dia_local = timezone.make_aware(datetime.combine(hoje_local, datetime.min.time()))
     fim_dia_local = timezone.make_aware(datetime.combine(hoje_local, datetime.max.time()))
-
     inicio_semana_local = hoje_local - timedelta(days=hoje_local.weekday())
     inicio_mes_local = hoje_local.replace(day=1)
-
     inicio_semana_aware = timezone.make_aware(datetime.combine(inicio_semana_local, datetime.min.time()))
     inicio_mes_aware = timezone.make_aware(datetime.combine(inicio_mes_local, datetime.min.time()))
-    # --- FIM DA CORREÇÃO ---
 
     vendas_hoje = Venda.objects.filter(comercio=comercio, data_hora__range=(inicio_dia_local, fim_dia_local))
     vendas_semana = Venda.objects.filter(comercio=comercio, data_hora__gte=inicio_semana_aware)
     vendas_mes = Venda.objects.filter(comercio=comercio, data_hora__gte=inicio_mes_aware)
-
     movimentacoes_hoje = MovimentacaoCaixa.objects.filter(caixa__comercio=comercio, data__range=(inicio_dia_local, fim_dia_local))
     movimentacoes_semana = MovimentacaoCaixa.objects.filter(caixa__comercio=comercio, data__gte=inicio_semana_aware)
     movimentacoes_mes = MovimentacaoCaixa.objects.filter(caixa__comercio=comercio, data__gte=inicio_mes_aware)
 
-    # O resto do código da view continua igual...
     faturamento_hoje = vendas_hoje.aggregate(Sum('valor_total'))['valor_total__sum'] or Decimal('0.00')
     faturamento_semana = vendas_semana.aggregate(Sum('valor_total'))['valor_total__sum'] or Decimal('0.00')
     faturamento_mes = vendas_mes.aggregate(Sum('valor_total'))['valor_total__sum'] or Decimal('0.00')
@@ -296,7 +281,7 @@ def relatorios_financeiros(request, comercio):
         'total_suplementos_semana': total_suplementos_semana,
         'total_suplementos_mes': total_suplementos_mes,
         'movimentacoes_hoje': movimentacoes_hoje,
-        'hoje': hoje_local, # Usando a data local
+        'hoje': hoje_local,
     }
     return render(request, 'core/painel/relatorios.html', contexto)
 
@@ -519,33 +504,45 @@ def recibo_venda(request, comercio, venda_id):
 @login_required
 @comercio_ativo_required
 def gerenciar_clientes(request, comercio):
-    lista_clientes = User.objects.filter(is_staff=False, is_superuser=False)
+    lista_clientes = User.objects.filter(cliente_profile__comercio_associado=comercio)
     contexto = {
         'comercio': comercio,
         'clientes': lista_clientes,
     }
     return render(request, 'core/painel/gerenciar_clientes.html', contexto)
 
+
 @login_required
 @comercio_ativo_required
 def adicionar_editar_cliente(request, comercio, cliente_id=None):
     if cliente_id:
-        cliente = get_object_or_404(User, id=cliente_id)
+        # Garante que só pode editar clientes do próprio comércio
+        cliente = get_object_or_404(User, id=cliente_id, cliente_profile__comercio_associado=comercio)
         titulo_pagina = "Editar Cliente"
     else:
         cliente = None
         titulo_pagina = "Adicionar Novo Cliente"
+
     if request.method == 'POST':
+        # A LINHA ABAIXO FOI CORRIGIDA (REMOVIDO O *args)
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             novo_cliente = form.save(commit=False)
-            if not cliente_id:
-                novo_cliente.set_password(User.objects.make_random_password(length=10))
+            if not cliente_id:  # Apenas para novos clientes
+                senha_aleatoria = get_random_string(length=10)
+                novo_cliente.set_password(senha_aleatoria)
+
             novo_cliente.save()
+
+            # Associa o novo cliente ao comércio atual, se for um novo cliente
+            if not cliente_id:
+                ClienteProfile.objects.create(user=novo_cliente, comercio_associado=comercio)
+
             messages.success(request, 'Cliente salvo com sucesso!')
             return redirect('gerenciar_clientes')
     else:
         form = ClienteForm(instance=cliente)
+
     contexto = {
         'form': form,
         'titulo_pagina': titulo_pagina,

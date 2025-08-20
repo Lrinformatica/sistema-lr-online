@@ -156,3 +156,11 @@ class MovimentacaoCaixa(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     descricao = models.TextField()
     data = models.DateTimeField(auto_now_add=True)
+
+
+class ClienteProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile')
+    comercio_associado = models.ForeignKey(Comercio, on_delete=models.CASCADE)
+
+    def __str__(self):
+            return f"Perfil de {self.user.username} para {self.comercio_associado.nome}"

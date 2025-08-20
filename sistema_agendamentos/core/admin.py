@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Comercio, Servico, Funcionario, HorarioTrabalho, Agendamento,
-    Produto, Venda, ItemVendido, EntradaEstoque, Caixa, MovimentacaoCaixa
+    Produto, Venda, ItemVendido, EntradaEstoque, Caixa, MovimentacaoCaixa,
+    ClienteProfile  # <-- ADICIONADO AQUI NA LISTA EXISTENTE
 )
 
 class ComercioAdmin(admin.ModelAdmin):
@@ -9,6 +10,7 @@ class ComercioAdmin(admin.ModelAdmin):
     list_filter = ('acesso_bloqueado',)
     search_fields = ('nome', 'dono__username')
 
+# Registros no Admin
 admin.site.register(Comercio, ComercioAdmin)
 admin.site.register(Venda)
 admin.site.register(Caixa)
@@ -19,3 +21,4 @@ admin.site.register(Agendamento)
 admin.site.register(MovimentacaoCaixa)
 admin.site.register(EntradaEstoque)
 admin.site.register(HorarioTrabalho)
+admin.site.register(ClienteProfile)
