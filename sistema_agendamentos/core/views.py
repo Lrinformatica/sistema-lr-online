@@ -11,8 +11,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-# --- IMPORTAÇÃO CORRETA PARA SENHA ALEATÓRIA ---
 from django.utils.crypto import get_random_string
+# --- NOVA IMPORTAÇÃO PARA LER XML ---
+import xml.etree.ElementTree as ET
 from .models import (
     Comercio, Servico, HorarioTrabalho, Agendamento,
     Funcionario, Produto, Venda, ItemVendido, EntradaEstoque,
@@ -146,7 +147,6 @@ def painel_home(request, comercio):
 @login_required
 @comercio_ativo_required
 def gerenciar_clientes(request, comercio):
-    # CORRIGIDO: Filtra clientes pelo comércio associado através do perfil
     lista_clientes = User.objects.filter(cliente_profile__comercio_associado=comercio)
     contexto = {
         'comercio': comercio,
@@ -159,7 +159,6 @@ def gerenciar_clientes(request, comercio):
 @comercio_ativo_required
 def adicionar_editar_cliente(request, comercio, cliente_id=None):
     if cliente_id:
-        # CORRIGIDO: Garante que só pode editar clientes do próprio comércio
         cliente = get_object_or_404(User, id=cliente_id, cliente_profile__comercio_associado=comercio)
         titulo_pagina = "Editar Cliente"
     else:
@@ -170,14 +169,12 @@ def adicionar_editar_cliente(request, comercio, cliente_id=None):
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             novo_cliente = form.save(commit=False)
-            if not cliente_id:  # Apenas para novos clientes
-                # CORRIGIDO: Usa o método moderno para gerar senha
+            if not cliente_id:
                 senha_aleatoria = get_random_string(length=10)
                 novo_cliente.set_password(senha_aleatoria)
 
             novo_cliente.save()
 
-            # CORRIGIDO: Associa o novo cliente ao comércio atual
             if not cliente_id:
                 ClienteProfile.objects.create(user=novo_cliente, comercio_associado=comercio)
 
@@ -193,8 +190,6 @@ def adicionar_editar_cliente(request, comercio, cliente_id=None):
     }
     return render(request, 'core/painel/adicionar_editar_form.html', contexto)
 
-
-# ... (resto das views que não foram alteradas) ...
 
 @login_required
 @comercio_ativo_required
@@ -241,6 +236,59 @@ def configuracoes_loja(request, comercio):
     return render(request, 'core/painel/configuracoes_loja.html', contexto)
 
 
+# --- NOVA VIEW PARA IMPORTAÇÃO DE PRODUTOS VIA XML ---
+@login_required
+@comercio_ativo_required
+def importar_produtos_xml(request, comercio):
+    if request.method == 'POST' and request.FILES.get('arquivo_xml'):
+        arquivo_xml = request.FILES['arquivo_xml']
+
+        if not arquivo_xml.name.endswith('.xml'):
+            messages.error(request, "Formato de arquivo inválido. Por favor, envie um arquivo .xml")
+            return redirect('gerenciar_produtos')
+
+        try:
+            tree = ET.parse(arquivo_xml)
+            root = tree.getroot()
+
+            produtos_importados = 0
+            # Namespace padrão para NFe (Nota Fiscal Eletrônica)
+            namespace = '{http://www.portalfiscal.inf.br/nfe}'
+
+            # Procura por todos os itens detalhados na nota
+            for det_node in root.findall(f'.//{namespace}det'):
+                prod_node = det_node.find(f'{namespace}prod')
+                if prod_node is not None:
+                    nome_produto = prod_node.find(f'{namespace}xProd').text
+                    preco_venda_str = prod_node.find(f'{namespace}vUnCom').text
+                    quantidade_str = prod_node.find(f'{namespace}qCom').text
+
+                    # Cria o produto no banco de dados
+                    Produto.objects.create(
+                        comercio=comercio,
+                        nome=nome_produto,
+                        preco_venda=Decimal(preco_venda_str),
+                        quantidade_estoque=int(float(quantidade_str)),
+                        # Você pode adicionar mais campos aqui se precisar (ex: preco_custo, codigo_barras)
+                    )
+                    produtos_importados += 1
+
+            if produtos_importados > 0:
+                messages.success(request, f"{produtos_importados} produtos foram importados com sucesso!")
+            else:
+                messages.warning(request, "Nenhum produto encontrado no arquivo XML. Verifique se é uma NFe válida.")
+
+        except ET.ParseError:
+            messages.error(request, "Erro ao processar o arquivo XML. O arquivo pode estar corrompido.")
+        except Exception as e:
+            messages.error(request, f"Ocorreu um erro inesperado: {e}")
+
+        return redirect('gerenciar_produtos')
+
+    return redirect('gerenciar_produtos')
+
+
+# ... (O resto do seu arquivo views.py continua daqui para baixo) ...
 @login_required
 @comercio_ativo_required
 def gerenciar_servicos(request, comercio):

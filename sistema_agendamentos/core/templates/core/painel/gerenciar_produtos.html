@@ -14,6 +14,26 @@
         </div>
     </div>
 
+    <!-- Bloco de Importação de XML (NOVA FUNCIONALIDADE) -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-filetype-xml me-2"></i>Importar Produtos por XML</h5>
+            <p class="card-text text-muted">Envie uma nota fiscal (NFe) ou outro arquivo XML para cadastrar produtos em massa.</p>
+
+            <!-- O formulário aponta para uma nova URL que vamos criar -->
+            <form action="{% url 'importar_produtos_xml' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="file" class="form-control" name="arquivo_xml" id="arquivo_xml" accept=".xml" required>
+                    <button class="btn btn-success" type="submit">
+                        <i class="bi bi-upload me-2"></i>Importar Arquivo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Fim do Bloco de Importação -->
+
     <div class="card">
         <div class="card-header fs-5 fw-bold">
             <i class="bi bi-box-seam me-2"></i> Estoque Atual

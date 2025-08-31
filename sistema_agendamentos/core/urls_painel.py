@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import render  # <-- AQUI ESTÁ A IMPORTAÇÃO CORRETA
 from . import views
 
 urlpatterns = [
@@ -12,6 +13,7 @@ urlpatterns = [
     path('produtos/adicionar/', views.adicionar_editar_produto, name='adicionar_produto'),
     path('produtos/editar/<int:produto_id>/', views.adicionar_editar_produto, name='editar_produto'),
     path('produtos/estoque/entrada/', views.entrada_estoque, name='entrada_estoque'),
+    path('produtos/importar_xml/', views.importar_produtos_xml, name='importar_produtos_xml'),
 
     # URLs de Serviços
     path('servicos/', views.gerenciar_servicos, name='gerenciar_servicos'),
@@ -35,9 +37,6 @@ urlpatterns = [
     path('venda/<int:venda_id>/recibo/', views.recibo_venda, name='recibo_venda'),
     path('caixa/abrir/', views.abrir_caixa, name='abrir_caixa'),
     path('caixa/fechar/', views.fechar_caixa, name='fechar_caixa'),
-
-    # --- CORREÇÃO FINAL APLICADA AQUI ---
-    # Substituímos a URL genérica por duas URLs específicas com os nomes corretos
     path('caixa/suplemento/', views.movimentacao_caixa, {'tipo': 'suplemento'}, name='caixa_suplemento'),
     path('caixa/sangria/', views.movimentacao_caixa, {'tipo': 'sangria'}, name='caixa_sangria'),
 
