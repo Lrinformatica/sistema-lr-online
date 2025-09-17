@@ -637,3 +637,16 @@ def recibo_venda(request, comercio, venda_id):
         return HttpResponseNotFound("Venda não encontrada")
     contexto = {'venda': venda, 'comercio': comercio}
     return render(request, 'core/painel/recibo_venda.html', contexto)
+
+
+@login_required
+@comercio_ativo_required
+def cupom_venda(request, comercio, venda_id):
+    try:
+        venda = Venda.objects.get(id=venda_id, comercio=comercio)
+    except Venda.DoesNotExist:
+        return HttpResponseNotFound("Venda não encontrada")
+
+    contexto = {'venda': venda, 'comercio': comercio}
+    # Esta função irá renderizar um novo ficheiro HTML que vamos criar a seguir
+    return render(request, 'core/painel/cupom_termico.html', contexto)

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cupom de Venda #{{ venda.id }}</title>
+    <style>
+        /* Estilos gerais para o cupão */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10pt;
+            color: #000;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+        }
+        .cupom {
+            width: 100%;
+            max-width: 100%;
+        }
+        .center {
+            text-align: center;
+        }
+        .header, .footer {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h4 {
+            margin: 0;
+        }
+        .header p {
+            margin: 2px 0;
+            font-size: 9pt;
+        }
+        hr.dashed {
+            border-top: 1px dashed #000;
+            border-bottom: none;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 2px 0;
+        }
+        .itens-header th {
+            text-align: left;
+            border-bottom: 1px dashed #000;
+        }
+        .item-row td {
+            vertical-align: top;
+            word-break: break-word; /* Garante que nomes longos não quebrem o layout */
+        }
+        .total-section {
+            margin-top: 10px;
+        }
+        .total-section .linha-total {
+            display: flex;
+            justify-content: space-between;
+        }
+        .linha-total.bold {
+            font-weight: bold;
+        }
+        .no-print {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-print {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        /* Estilos específicos para impressão */
+        @media print {
+            @page {
+                size: 80mm auto; /* Tamanho para impressora de 80mm */
+                margin: 3mm;
+            }
+            body {
+                font-size: 9pt; /* Fonte menor para impressão */
+            }
+            .no-print {
+                display: none; /* Esconde o botão de imprimir */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cupom">
+        <div class="header">
+            <h4>{{ comercio.nome|default:"Nome da Loja" }}</h4>
+            {% if comercio.cnpj %}<p>{{ comercio.cnpj }}</p>{% endif %}
+            {% if comercio.endereco %}<p>{{ comercio.endereco }}</p>{% endif %}
+            {% if comercio.whatsapp %}<p>WhatsApp: {{ comercio.whatsapp }}</p>{% endif %}
+        </div>
+        <hr class="dashed">
+        <p class="center">CUPOM NÃO FISCAL</p>
+        <p>Venda #{{ venda.id }} - {{ venda.data_hora|date:"d/m/Y H:i" }}</p>
+        {% if venda.cliente_info_texto %}<p>Cliente: {{ venda.cliente_info_texto }}</p>{% endif %}
+        <hr class="dashed">
+        <table>
+            <thead class="itens-header">
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align: right;">Qtd</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in venda.itens.all %}
+                <tr class="item-row">
+                    <td>
+                        {% if item.produto %}
+                            {{ item.produto.nome }}
+                        {% elif item.servico %}
+                            {{ item.servico.nome }}
+                        {% else %}
+                            (Item sem descrição)
+                        {% endif %}
+                        <br>
+                        <small>({{ item.quantidade|default:0 }} un x R$ {{ item.preco_unitario_na_venda|default:0|floatformat:2 }})</small>
+                    </td>
+                    <td style="text-align: right;">{{ item.quantidade|default:0 }}</td>
+                    <td style="text-align: right;">R$ {% widthratio item.preco_unitario_na_venda 1 item.quantidade as subtotal %}{{ subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr class="dashed">
+        <div class="total-section">
+            {% with subtotal_venda=venda.valor_total|add:venda.desconto %}
+            <div class="linha-total">
+                <span>Subtotal</span>
+                <span>R$ {{ subtotal_venda|floatformat:2 }}</span>
+            </div>
+            {% if venda.desconto > 0 %}
+            <div class="linha-total">
+                <span>Desconto</span>
+                <span>- R$ {{ venda.desconto|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            <div class="linha-total bold">
+                <span>TOTAL</span>
+                <span>R$ {{ venda.valor_total|floatformat:2 }}</span>
+            </div>
+            {% endwith %}
+        </div>
+        <hr class="dashed">
+        <div class="pagamentos">
+            <p><strong>Forma de Pagamento:</strong> {{ venda.forma_pagamento|default:"Não informada" }}</p>
+        </div>
+        <div class="footer">
+            <p>Obrigado pela preferência!</p>
+        </div>
+        <div class="no-print">
+            <button onclick="window.print();" class="btn-print">Imprimir</button>
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

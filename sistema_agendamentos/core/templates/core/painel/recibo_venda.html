@@ -17,8 +17,19 @@
         .totals .row.total { font-weight: bold; font-size: 16px; }
         .footer { text-align: center; margin-top: 20px; font-size: 12px; }
         .actions { text-align: center; margin-top: 30px; }
-        .actions button { padding: 10px 20px; margin: 0 5px; cursor: pointer; border: 1px solid #ccc; }
-        .btn-primary { background-color: #0d6efd; color: white; border-color: #0d6efd; text-decoration: none; display: inline-block; }
+        /* Estilos ajustados para os links funcionarem como botões */
+        .actions a, .actions button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            font-family: sans-serif; /* Fonte mais legível para botões */
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+        .btn-primary { background-color: #0d6efd; color: white; border-color: #0d6efd; }
         .btn-secondary { background-color: #6c757d; color: white; border-color: #6c757d; }
         @media print {
             body { background-color: white; padding: 0;}
@@ -108,8 +119,9 @@
     </div>
 
     <div class="actions">
-        <a href="{% url 'painel_pdv' %}" class="btn-primary" style="padding: 10px 20px; border-radius: 5px;">Nova Venda</a>
-        <button class="btn-secondary" onclick="window.print()">Imprimir</button>
+        <a href="{% url 'painel_pdv' %}" class="btn-primary">Nova Venda</a>
+        <button class="btn-secondary" onclick="window.print()">Imprimir (A4)</button>
+        <a href="{% url 'cupom_venda' venda.id %}" target="_blank" class="btn-secondary">Imprimir Cupão Térmico</a>
     </div>
 </body>
 </html>
