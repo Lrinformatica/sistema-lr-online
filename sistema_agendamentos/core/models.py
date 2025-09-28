@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
-from decimal import Decimal  # Adicionei esta importação que estava faltando para o Decimal funcionar
-
+from decimal import Decimal
 
 # --- NOVO MODELO PARA GERENCIAR A EQUIPE ---
 class MembroComercio(models.Model):
@@ -157,13 +156,6 @@ class MovimentacaoCaixa(models.Model):
     descricao = models.TextField()
     data = models.DateTimeField(auto_now_add=True)
 
-
-class ClienteProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile')
-    comercio_associado = models.ForeignKey(Comercio, on_delete=models.CASCADE)
-
-    def __str__(self):
-            return f"Perfil de {self.user.username} para {self.comercio_associado.nome}"
 
 class ClienteProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile')

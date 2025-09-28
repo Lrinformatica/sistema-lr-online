@@ -1,5 +1,5 @@
 from django.urls import path
-from django.shortcuts import render  # <-- AQUI ESTÁ A IMPORTAÇÃO CORRETA
+from django.shortcuts import render
 from . import views
 
 urlpatterns = [
@@ -32,11 +32,11 @@ urlpatterns = [
 
     # URLs do PDV e Caixa
     path('pdv/', views.pdv, name='painel_pdv'),
-    path('pdv/buscar-itens/', views.buscar_itens_pdv, name='buscar_itens_pdv'),
+    # A LINHA ABAIXO FOI MODIFICADA E A NOVA FOI ADICIONADA
+    path('pdv/buscar-itens/', views.buscar_itens_pdv_inteligente, name='buscar_itens_pdv_inteligente'),
     path('pdv/finalizar/', views.finalizar_venda, name='finalizar_venda'),
     path('venda/<int:venda_id>/recibo/', views.recibo_venda, name='recibo_venda'),
     path('venda/<int:venda_id>/cupom/', views.cupom_venda, name='cupom_venda'),
-    path('caixa/abrir/', views.abrir_caixa, name='abrir_caixa'),
     path('caixa/abrir/', views.abrir_caixa, name='abrir_caixa'),
     path('caixa/fechar/', views.fechar_caixa, name='fechar_caixa'),
     path('caixa/suplemento/', views.movimentacao_caixa, {'tipo': 'suplemento'}, name='caixa_suplemento'),

@@ -2,89 +2,95 @@
 {% block title %}PDV - Ponto de Venda{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">PDV - Ponto de Venda</h1>
-    <div class="row">
-        <div class="col-lg-7">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Buscar Produto ou Serviço (F5)</h5>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Digite o nome ou código de barras..." id="termo-busca">
-                        <button class="btn btn-outline-secondary" type="button" id="botao-buscar">Buscar</button>
-                    </div>
-                    <div id="resultados-busca"></div>
+<h1 class="mb-4">PDV - Ponto de Venda</h1>
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Buscar Produto ou Serviço (F5)</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Digite nome, código ou 'Qtd*código'..." id="termo-busca">
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Itens da Venda</h5>
-                </div>
-                <div id="itens-venda-lista">
-                    <p class="text-muted p-3" id="carrinho-vazio-msg">O carrinho está vazio.</p>
-                </div>
+                <div id="resultados-busca" class="position-relative"></div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Informar Cliente (Opcional)</h5>
-                    <div class="mb-3">
-                        <label for="cliente-info-texto" class="form-label">CPF ou Nome no Cupom</label>
-                        <input type="text" class="form-control" id="cliente-info-texto" placeholder="Digite para identificação">
-                    </div>
-                    <hr>
-                    <h5 class="card-title">Resumo</h5>
-                    <div id="resumo-venda">
-                        <div class="d-flex justify-content-between">
-                            <span>Subtotal</span>
-                            <span id="subtotal-venda">R$ 0,00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Desconto Total</span>
-                            <span id="desconto-venda-display" class="text-danger">- R$ 0,00</span>
-                        </div>
-                    </div>
-                    <hr>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Itens da Venda</h5>
+            </div>
+            <div id="itens-venda-lista">
+                <p class="text-muted p-3" id="carrinho-vazio-msg">O carrinho está vazio.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Informar Cliente (Opcional)</h5>
+                <div class="mb-3">
+                    <label for="cliente-info-texto" class="form-label">CPF ou Nome no Cupom</label>
+                    <input type="text" class="form-control" id="cliente-info-texto" placeholder="Digite para identificação">
+                </div>
+                <hr>
+                <h5 class="card-title">Resumo</h5>
+                <div id="resumo-venda">
                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title">Total da Venda</h5>
-                        <h2 class="display-6 fw-bold" id="total-venda">R$ 0,00</h2>
+                        <span>Subtotal</span>
+                        <span id="subtotal-venda">R$ 0,00</span>
                     </div>
-                    <hr>
-                    <h5 class="card-title">Pagamento</h5>
-                    <div class="input-group mb-3">
-                        <label class="input-group-text" for="desconto-total-input">Desconto (R$ ou %)</label>
-                        <input type="text" class="form-control" id="desconto-total-input" placeholder="Ex: 10 ou 5%">
-                        <button class="btn btn-outline-secondary" type="button" id="aplicar-desconto-total">Aplicar</button>
+                    <div class="d-flex justify-content-between">
+                        <span>Desconto Total</span>
+                        <span id="desconto-venda-display" class="text-danger">- R$ 0,00</span>
                     </div>
-                    <div class="mb-3">
-                        <label for="forma-pagamento" class="form-label">Forma de Pagamento</label>
-                        <select class="form-select" id="forma-pagamento">
-                            <option value="dinheiro">Dinheiro</option>
-                            <option value="pix">PIX</option>
-                            <option value="debito">Cartão de Débito</option>
-                            <option value="credito">Cartão de Crédito</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="campo-valor-pago-div" style="display: block;">
-                        <label for="valor-pago" class="form-label">Valor Pago pelo Cliente</label>
-                        <input type="number" class="form-control" id="valor-pago" placeholder="Ex: 150.00" step="0.01">
-                    </div>
-                    <div class="mb-3">
-                        <label for="troco" class="form-label">Troco</label>
-                        <input type="text" class="form-control" id="troco" readonly value="R$ 0,00">
-                    </div>
-                    <div class="d-grid">
-                        <button class="btn btn-success btn-lg" id="botao-finalizar-venda" disabled>Finalizar Venda (F4)</button>
-                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Total da Venda</h5>
+                    <h2 class="display-6 fw-bold mb-0" id="total-venda">R$ 0,00</h2>
+                </div>
+                <hr>
+                <h5 class="card-title">Pagamento</h5>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="desconto-total-input">Desconto (R$ ou %)</label>
+                    <input type="text" class="form-control" id="desconto-total-input" placeholder="Ex: 10 ou 5%">
+                    <button class="btn btn-outline-secondary" type="button" id="aplicar-desconto-total">Aplicar</button>
+                </div>
+                <div class="mb-3">
+                    <label for="forma-pagamento" class="form-label">Forma de Pagamento</label>
+                    <select class="form-select" id="forma-pagamento">
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="pix">PIX</option>
+                        <option value="debito">Cartão de Débito</option>
+                        <option value="credito">Cartão de Crédito</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="campo-valor-pago-div" style="display: block;">
+                    <label for="valor-pago" class="form-label">Valor Pago pelo Cliente</label>
+                    <input type="number" class="form-control" id="valor-pago" placeholder="Ex: 150.00" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label for="troco" class="form-label">Troco</label>
+                    <input type="text" class="form-control" id="troco" readonly value="R$ 0,00">
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-success btn-lg" id="botao-finalizar-venda" disabled>Finalizar Venda (F4)</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// =================================================================================
+// SCRIPT PDV INTELIGENTE - COMPLETAMENTE REESCRITO
+// =================================================================================
 document.addEventListener('DOMContentLoaded', function() {
+
+    // -----------------------------------------------------------------------------
+    // 1. MAPEAMENTO DOS ELEMENTOS DO HTML (DOM)
+    // -----------------------------------------------------------------------------
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -101,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const csrftoken = getCookie('csrftoken');
     const termoBuscaInput = document.getElementById('termo-busca');
-    const botaoBuscar = document.getElementById('botao-buscar');
     const resultadosBuscaDiv = document.getElementById('resultados-busca');
     const itensVendaListaDiv = document.getElementById('itens-venda-lista');
     const subtotalVendaEl = document.getElementById('subtotal-venda');
@@ -116,16 +121,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const descontoTotalInput = document.getElementById('desconto-total-input');
     const aplicarDescontoTotalBtn = document.getElementById('aplicar-desconto-total');
 
-    let carrinho = [];
-    let descontoTotalVenda = 0;
+    // -----------------------------------------------------------------------------
+    // 2. ESTADO DA APLICAÇÃO (VARIÁVEIS GLOBAIS)
+    // -----------------------------------------------------------------------------
+    let carrinho = []; // Array que armazena os itens da venda
+    let descontoTotalVenda = 0; // Armazena o desconto global da venda
+    let itemSelecionadoIndex = -1; // Para navegação com teclado nos resultados
 
-    botaoBuscar.addEventListener('click', buscarItens);
-    termoBuscaInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); buscarItens(); } });
+    // -----------------------------------------------------------------------------
+    // 3. ADIÇÃO DE EVENTOS (LISTENERS)
+    // -----------------------------------------------------------------------------
+    termoBuscaInput.addEventListener('keydown', handleBuscaKeyDown);
+    termoBuscaInput.addEventListener('input', handleBuscaInput);
     formaPagamentoSelect.addEventListener('change', () => atualizarCarrinho());
     valorPagoInput.addEventListener('input', () => atualizarCarrinho());
     botaoFinalizarVenda.addEventListener('click', finalizarVenda);
     aplicarDescontoTotalBtn.addEventListener('click', aplicarDescontoTotal);
 
+    // Atalhos globais do teclado
     document.addEventListener('keydown', function(e) {
         if (e.key === 'F5') {
             e.preventDefault();
@@ -134,67 +147,176 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (e.key === 'F4') {
             e.preventDefault();
-            if (!botaoFinalizarVenda.disabled) {
-                finalizarVenda();
-            }
+            if (!botaoFinalizarVenda.disabled) finalizarVenda();
+        }
+        if (e.key === 'Escape') { // Pressionar ESC limpa os resultados da busca
+            resultadosBuscaDiv.innerHTML = '';
         }
     });
 
-    async function buscarItens() {
-        const termo = termoBuscaInput.value;
-        if (termo.length < 2) return;
-        const response = await fetch(`/painel/pdv/buscar-itens/?termo=${termo}`);
-        const data = await response.json();
-        exibirResultados(data.itens);
-    }
+    // -----------------------------------------------------------------------------
+    // 4. LÓGICA PRINCIPAL DE BUSCA E ADIÇÃO
+    // -----------------------------------------------------------------------------
 
-    function exibirResultados(itens) {
-        resultadosBuscaDiv.innerHTML = '';
-        if (itens.length === 0) {
-            resultadosBuscaDiv.innerHTML = '<p class="text-muted mt-2">Nenhum item encontrado.</p>';
+    // Gerencia o que acontece quando o usuário digita no campo de busca
+    function handleBuscaInput(e) {
+        const termo = e.target.value;
+        // Se o termo for curto ou se for um atalho de quantidade, não faz busca por nome
+        if (termo.length < 2 || termo.includes('*')) {
+            resultadosBuscaDiv.innerHTML = '';
             return;
         }
+        buscarItens(termo, 'busca_nome');
+    }
+
+    // Gerencia o que acontece quando teclas especiais são pressionadas no campo de busca
+    function handleBuscaKeyDown(e) {
+        const key = e.key;
+        if (key === 'Enter') {
+            e.preventDefault();
+            // Se um item estiver selecionado na lista de resultados, adiciona ele
+            if (itemSelecionadoIndex > -1) {
+                const itemSelecionadoEl = resultadosBuscaDiv.querySelector('.list-group-item.active');
+                if (itemSelecionadoEl) {
+                    const itemData = JSON.parse(itemSelecionadoEl.dataset.item);
+                    adicionarItemAoCarrinho(itemData, 1);
+                }
+            } else { // Senão, processa o texto digitado
+                buscarItens(termoBuscaInput.value, 'enter');
+            }
+        } else if (key === 'ArrowDown' || key === 'ArrowUp') {
+            e.preventDefault();
+            navegarResultados(key);
+        }
+    }
+
+    // Função central que chama a API no backend
+    async function buscarItens(termo, acao = 'enter') {
+        if (!termo) return;
+
+        let quantidade = 1;
+        let termoDeBusca = termo;
+
+        // Verifica se é o atalho "Qtd*código"
+        if (termo.includes('*')) {
+            const partes = termo.split('*');
+            const qtdStr = partes[0].trim();
+            const codStr = partes[1].trim();
+            const qtdNum = parseInt(qtdStr, 10);
+            if (!isNaN(qtdNum) && qtdNum > 0 && codStr) {
+                quantidade = qtdNum;
+                termoDeBusca = codStr;
+            }
+        }
+
+        // Chama a API do Django
+        const response = await fetch(`/painel/pdv/buscar-itens/?termo=${termoDeBusca}`);
+        const data = await response.json();
+
+        // Se a API retornar um único item (código de barras encontrado)
+        if (acao === 'enter' && data.itens.length === 1) {
+            adicionarItemAoCarrinho(data.itens[0], quantidade);
+        } else if (data.itens.length > 0) {
+            // Se retornar múltiplos itens (busca por nome), exibe a lista
+            exibirResultados(data.itens);
+        } else {
+            // Se não encontrar nada
+            resultadosBuscaDiv.innerHTML = '<p class="text-muted mt-2">Nenhum item encontrado.</p>';
+        }
+    }
+
+    // Mostra a lista de resultados para seleção manual
+    function exibirResultados(itens) {
+        resultadosBuscaDiv.innerHTML = '';
+        itemSelecionadoIndex = -1; // Reseta a seleção do teclado
+
         const lista = document.createElement('ul');
-        lista.className = 'list-group mt-2';
+        lista.className = 'list-group mt-2 position-absolute w-100'
+        lista.style.zIndex = '1000';
+
         itens.forEach(item => {
             const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.className = 'list-group-item list-group-item-action';
+            li.style.cursor = 'pointer';
             li.innerHTML = `<span>${item.nome} (${item.tipo}) - R$ ${parseFloat(item.preco).toFixed(2)}</span>`;
-            const botaoAdicionar = document.createElement('button');
-            botaoAdicionar.className = 'btn btn-sm btn-primary';
-            botaoAdicionar.innerText = 'Adicionar';
-            botaoAdicionar.onclick = () => perguntarQuantidade(item);
-            li.appendChild(botaoAdicionar);
+            li.dataset.item = JSON.stringify(item); // Armazena os dados do item no elemento
+
+            // Adiciona o item ao clicar com o mouse
+            li.addEventListener('click', () => {
+                adicionarItemAoCarrinho(item, 1);
+            });
+
             lista.appendChild(li);
         });
         resultadosBuscaDiv.appendChild(lista);
     }
 
-    function perguntarQuantidade(item) {
-        const quantidadeStr = prompt(`Qual a quantidade para "${item.nome}"?`, "1");
-        if (!quantidadeStr) return;
-        const quantidade = parseFloat(quantidadeStr.replace(',', '.'));
-        if (isNaN(quantidade) || quantidade <= 0) {
-            alert("Por favor, insira uma quantidade válida.");
-            return;
-        }
-        adicionarItemVenda(item, quantidade);
-    }
+    // Lógica para adicionar o item ao carrinho ou incrementar a quantidade
+    function adicionarItemAoCarrinho(item, quantidade) {
+        const itemExistente = carrinho.find(i => i.id === item.id);
 
-    function adicionarItemVenda(item, quantidade) {
-        carrinho.push({ ...item, quantidade: quantidade, desconto: 0 });
+        if (itemExistente) {
+            // Se o item já existe, apenas incrementa a quantidade
+            itemExistente.quantidade += quantidade;
+        } else {
+            // Se for um novo item, adiciona ao carrinho
+            carrinho.push({ ...item, quantidade: quantidade, desconto: 0 });
+        }
+
+        // Limpa a busca e atualiza a tela
         resultadosBuscaDiv.innerHTML = '';
         termoBuscaInput.value = '';
         termoBuscaInput.focus();
         atualizarCarrinho();
     }
 
+    // Permite usar as setas do teclado para selecionar um item da lista de busca
+    function navegarResultados(key) {
+        const itens = resultadosBuscaDiv.querySelectorAll('.list-group-item');
+        if (itens.length === 0) return;
+
+        // Remove a seleção atual
+        if (itemSelecionadoIndex > -1) {
+            itens[itemSelecionadoIndex].classList.remove('active');
+        }
+
+        if (key === 'ArrowDown') {
+            itemSelecionadoIndex = (itemSelecionadoIndex + 1) % itens.length;
+        } else if (key === 'ArrowUp') {
+            itemSelecionadoIndex = (itemSelecionadoIndex - 1 + itens.length) % itens.length;
+        }
+
+        // Adiciona a seleção ao novo item
+        itens[itemSelecionadoIndex].classList.add('active');
+    }
+
+    // -----------------------------------------------------------------------------
+    // 5. FUNÇÕES DE MANIPULAÇÃO DO CARRINHO E DA VENDA (a maioria do seu código original, adaptado)
+    // -----------------------------------------------------------------------------
+
     function removerItemCarrinho(indexDoItem) {
         carrinho.splice(indexDoItem, 1);
         atualizarCarrinho();
     }
 
+    // Função para alterar a quantidade de um item diretamente no carrinho
+    function alterarQuantidadeItem(indexDoItem) {
+        const item = carrinho[indexDoItem];
+        const novaQuantidadeStr = prompt(`Alterar quantidade para "${item.nome}":`, item.quantidade);
+
+        if (!novaQuantidadeStr) return;
+        const novaQuantidade = parseFloat(novaQuantidadeStr.replace(',', '.'));
+
+        if (isNaN(novaQuantidade) || novaQuantidade <= 0) {
+            alert("Por favor, insira uma quantidade válida.");
+            return;
+        }
+        item.quantidade = novaQuantidade;
+        atualizarCarrinho();
+    }
+
     function aplicarDescontoItem(indexDoItem) {
+        // ... (seu código original de desconto por item)
         const item = carrinho[indexDoItem];
         const subtotalOriginal = item.quantidade * parseFloat(item.preco);
         const descontoStr = prompt(`Aplicar desconto em "${item.nome}".\nSubtotal: R$ ${subtotalOriginal.toFixed(2)}\nDigite o valor do desconto (Ex: 10 ou 5%):`);
@@ -219,6 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function aplicarDescontoTotal() {
+        // ... (seu código original de desconto total)
         const subtotalGeral = carrinho.reduce((acc, item) => acc + (item.quantidade * parseFloat(item.preco)) - item.desconto, 0);
         const descontoStr = descontoTotalInput.value;
         if (!descontoStr) {
@@ -244,6 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
         atualizarCarrinho();
     }
 
+    // Função que redesenha o carrinho e os totais na tela
     function atualizarCarrinho() {
         let subtotalGeral = 0;
         let descontoItensTotal = 0;
@@ -267,15 +391,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 li.className = 'list-group-item';
 
                 let textoHtml = `
-                    <div>
-                        ${item.quantidade}x ${item.nome}
+                    <div style="cursor: pointer;" title="Clique para alterar a quantidade">
+                        <strong>${item.quantidade}x</strong> ${item.nome}
                         <small class="d-block text-muted">R$ ${subtotalComDesconto.toFixed(2)}</small>
                     </div>
                 `;
                 if(item.desconto > 0) {
                     textoHtml = `
-                        <div>
-                            ${item.quantidade}x ${item.nome}
+                        <div style="cursor: pointer;" title="Clique para alterar a quantidade">
+                            <strong>${item.quantidade}x</strong> ${item.nome}
                             <small class="d-block"><s class="text-muted">R$ ${subtotalItem.toFixed(2)}</s> <span class="text-danger">(-R$ ${item.desconto.toFixed(2)})</span></small>
                             <strong class="d-block">R$ ${subtotalComDesconto.toFixed(2)}</strong>
                         </div>
@@ -284,7 +408,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const container = document.createElement('div');
                 container.className = 'd-flex justify-content-between align-items-center';
-                container.innerHTML = textoHtml;
+                const textoDiv = document.createElement('div');
+                textoDiv.innerHTML = textoHtml;
+                // Adiciona o evento para alterar quantidade ao clicar no nome/qtd do item
+                textoDiv.onclick = () => alterarQuantidadeItem(index);
+                container.appendChild(textoDiv);
 
                 const botoesDiv = document.createElement('div');
                 const botaoDesconto = document.createElement('button');
@@ -328,16 +456,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function calcularTroco(total) {
         const valorPago = parseFloat(valorPagoInput.value) || 0;
-        const totalFinal = total;
-        if (valorPago >= totalFinal) {
-            const troco = valorPago - totalFinal;
-            trocoInput.value = `R$ ${troco.toFixed(2).replace('.', ',')}`;
+        if (valorPago >= total) {
+            const troco = valorPago - total;
+            trocoInput.value = `R$ ${troco.toFixed(2)}`;
         } else {
             trocoInput.value = '---';
         }
     }
 
     async function finalizarVenda() {
+        // ... (seu código original de finalizar venda)
         if (carrinho.length === 0) {
             alert('O carrinho está vazio! Adicione itens antes de finalizar a venda.');
             return;
@@ -369,6 +497,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(`Ocorreu um erro ao finalizar a venda: ${resultado.error}`);
         }
     }
+
+    // Foca no campo de busca ao carregar a página
+    termoBuscaInput.focus();
 });
 </script>
 {% endblock %}

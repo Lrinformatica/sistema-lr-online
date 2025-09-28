@@ -12,7 +12,6 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
-# --- NOVA IMPORTAÇÃO PARA LER XML ---
 import xml.etree.ElementTree as ET
 from .models import (
     Comercio, Servico, HorarioTrabalho, Agendamento,
@@ -27,7 +26,7 @@ from .decorators import comercio_ativo_required
 
 
 # ### VIEWS PÚBLICAS ###
-
+# ... (todo o resto das suas views públicas fica aqui, sem alterações) ...
 def home(request):
     todos_os_comercios = Comercio.objects.all()
     contexto = {'comercios': todos_os_comercios}
@@ -129,7 +128,7 @@ def pagina_agendamento(request, servico_id):
 
 
 # ### VIEWS DO PAINEL ###
-
+# ... (todo o resto das suas views do painel fica aqui, sem alterações, ATÉ a view de busca) ...
 @login_required
 @comercio_ativo_required
 def painel_home(request, comercio):
@@ -556,23 +555,55 @@ def movimentacao_caixa(request, comercio, tipo):
     return render(request, 'core/painel/movimentacao_caixa.html', contexto)
 
 
+# <<< INÍCIO DA MODIFICAÇÃO >>>
 @login_required
 @comercio_ativo_required
-def buscar_itens_pdv(request, comercio):
+def buscar_itens_pdv_inteligente(request, comercio):
     termo_busca = request.GET.get('termo', '')
-    produtos = Produto.objects.filter(
-        Q(nome__icontains=termo_busca) | Q(codigo_barras=termo_busca),
-        comercio=comercio
-    )
-    servicos = Servico.objects.filter(nome__icontains=termo_busca, comercio=comercio)
+
+    # Tenta encontrar um produto exatamente pelo código de barras
+    try:
+        # Usamos .get() que levanta uma exceção se não encontrar ou encontrar mais de um
+        produto_por_codigo = Produto.objects.get(codigo_barras=termo_busca, comercio=comercio)
+        item_formatado = {
+            'id': f'produto_{produto_por_codigo.id}',
+            'nome': produto_por_codigo.nome,
+            'preco': str(produto_por_codigo.preco_venda),
+            'tipo': 'Produto'
+        }
+        # Retorna uma lista com um único item encontrado pelo código de barras
+        return JsonResponse({'itens': [item_formatado]})
+    except Produto.DoesNotExist:
+        # Se não encontrar pelo código de barras, continua para a busca por nome
+        pass
+    except Produto.MultipleObjectsReturned:
+        # Caso raro de ter códigos de barras duplicados, trata como busca normal
+        pass
+
+    # Se não encontrou um código de barras exato, busca por nome
+    produtos_por_nome = Produto.objects.filter(nome__icontains=termo_busca, comercio=comercio)
+    servicos_por_nome = Servico.objects.filter(nome__icontains=termo_busca, comercio=comercio)
+
     resultados = []
-    for produto in produtos:
-        resultados.append(
-            {'id': f'produto_{produto.id}', 'nome': produto.nome, 'preco': str(produto.preco_venda), 'tipo': 'Produto'})
-    for servico in servicos:
-        resultados.append(
-            {'id': f'servico_{servico.id}', 'nome': servico.nome, 'preco': str(servico.valor), 'tipo': 'Serviço'})
+    for produto in produtos_por_nome:
+        resultados.append({
+            'id': f'produto_{produto.id}',
+            'nome': produto.nome,
+            'preco': str(produto.preco_venda),
+            'tipo': 'Produto'
+        })
+    for servico in servicos_por_nome:
+        resultados.append({
+            'id': f'servico_{servico.id}',
+            'nome': servico.nome,
+            'preco': str(servico.valor),
+            'tipo': 'Serviço'
+        })
+
     return JsonResponse({'itens': resultados})
+
+
+# <<< FIM DA MODIFICAÇÃO >>>
 
 
 @login_required
@@ -648,5 +679,4 @@ def cupom_venda(request, comercio, venda_id):
         return HttpResponseNotFound("Venda não encontrada")
 
     contexto = {'venda': venda, 'comercio': comercio}
-    # Esta função irá renderizar um novo ficheiro HTML que vamos criar a seguir
     return render(request, 'core/painel/cupom_termico.html', contexto)
